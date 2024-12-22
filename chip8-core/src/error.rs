@@ -2,7 +2,7 @@ use std::{error::Error, fmt::Display};
 
 #[derive(Debug)]
 pub enum Chip8Error {
-    DecodeError(String, u16)
+    DecodeError(String, u16),
 }
 
 impl Display for Chip8Error {
@@ -11,5 +11,4 @@ impl Display for Chip8Error {
     }
 }
 
-impl Error for Chip8Error {
-}
+impl Error for Chip8Error {}

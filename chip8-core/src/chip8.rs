@@ -1,4 +1,7 @@
-use std::{fs::{self, File}, io::{self, Read}};
+use std::{
+    fs::{self, File},
+    io::{self, Read},
+};
 
 use log::{info, warn};
 
@@ -13,7 +16,7 @@ pub struct Chip8 {
     sp: u8,
     stack: [u16; 16],
 
-    cls_scn: bool
+    cls_scn: bool,
 }
 
 impl Chip8 {
@@ -29,7 +32,7 @@ impl Chip8 {
             pc: 0x200,
             sp: 0,
             stack: [0; 16],
-            cls_scn: false
+            cls_scn: false,
         })
     }
 
@@ -48,9 +51,7 @@ impl Chip8 {
         self.st != 0
     }
 
-    fn run_pipeline() {
-
-    }
+    fn run_pipeline() {}
 
     fn fetch(&mut self) -> u16 {
         let pc = self.pc as usize;
@@ -65,60 +66,64 @@ impl Chip8 {
     pub fn get_scn_state(&mut self) -> bool {
         let f = self.cls_scn;
         self.cls_scn = false;
-        f 
+        f
     }
 
     fn execute(&mut self, inst: Instruction) {
         let mut npc = self.pc + 2;
         match inst {
-            Instruction::I0NNN(_) => { info!("meet instruction 0nnn => do nothing.."); },
-            Instruction::I00E0 => { self.cls_scn = true; },
+            Instruction::I0NNN(_) => {
+                info!("meet instruction 0nnn => do nothing..");
+            }
+            Instruction::I00E0 => {
+                self.cls_scn = true;
+            }
             Instruction::I00EE => {
                 npc = self.stack[self.st as usize];
                 self.st -= 1;
-            },
+            }
             Instruction::I1NNN(addr) => {
                 npc = addr;
-            },
+            }
             Instruction::I2NNN(addr) => {
                 self.st += 1;
                 self.stack[self.st as usize] = self.pc;
                 npc = addr;
-            },
+            }
             Instruction::I3XKK(x, kk) => {
                 if self.read_reg(x) == kk as u16 {
                     npc += 2;
                 }
-            },
+            }
             Instruction::I4XKK(x, kk) => {
                 if self.read_reg(x) != kk as u16 {
                     npc += 2;
                 }
-            },
+            }
             Instruction::I5XY0(x, y) => {
                 if self.read_reg(x) == self.read_reg(y) {
                     npc += 2;
                 }
-            },
+            }
             Instruction::I6XKK(x, kk) => self.write_reg(x, kk as u16),
             Instruction::I7XKK(x, kk) => {
                 let tmp = self.read_reg(x) + kk as u16;
                 self.write_reg(x, tmp);
-            },
+            }
             Instruction::I8XY0(x, y) => {
                 let tmp = self.read_reg(y);
                 self.write_reg(x, tmp);
-            },
+            }
             Instruction::I8XY1(x, y) => {
                 let vx = self.read_reg(x);
                 let vy = self.read_reg(y);
                 self.write_reg(x, vx | vy);
-            },
+            }
             Instruction::I8XY2(x, y) => {
                 let vx = self.read_reg(x);
                 let vy = self.read_reg(y);
                 self.write_reg(x, vx & vy);
-            },
+            }
             Instruction::I8XY3(_, _) => todo!(),
             Instruction::I8XY4(_, _) => todo!(),
             Instruction::I8XY5(_, _) => todo!(),

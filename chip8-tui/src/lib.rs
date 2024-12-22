@@ -2,13 +2,21 @@ use std::error::{self, Error};
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use derive_builder::Builder;
-use ratatui::{buffer::Buffer, layout::Rect, style::{Style, Stylize}, symbols::border, text::{Line, Text}, widgets::{Block, Paragraph, Widget}, DefaultTerminal, Frame};
+use ratatui::{
+    buffer::Buffer,
+    layout::Rect,
+    style::{Style, Stylize},
+    symbols::border,
+    text::{Line, Text},
+    widgets::{Block, Paragraph, Widget},
+    DefaultTerminal, Frame,
+};
 
 const SCREEN_WIDTH: usize = 64;
 const SCREEN_HEIGHT: usize = 32;
 
 #[derive(Builder)]
-struct Chip8App{
+struct Chip8App {
     map: Vec<bool>,
     #[builder(default = false)]
     exit: bool,
@@ -35,7 +43,9 @@ impl Chip8App {
 
     fn handle_events(&mut self) -> Result<(), Box<dyn Error>> {
         match event::read()? {
-            Event::Key(key_event) if key_event.kind == KeyEventKind::Press => self.handle_key_events(key_event),
+            Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
+                self.handle_key_events(key_event)
+            }
             _ => {}
         }
         Ok(())
@@ -53,7 +63,6 @@ impl Chip8App {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use rand::Rng;
@@ -64,7 +73,9 @@ mod tests {
     fn it_works() {
         let mut rng = rand::thread_rng();
         let mut terminal = ratatui::init();
-        let arr: Vec<bool> = (0.. SCREEN_WIDTH * SCREEN_HEIGHT).map(|x| rng.gen_bool(0.5)).collect();
+        let arr: Vec<bool> = (0..SCREEN_WIDTH * SCREEN_HEIGHT)
+            .map(|x| rng.gen_bool(0.5))
+            .collect();
         assert!(arr.len() == SCREEN_WIDTH * SCREEN_HEIGHT);
         let app_result = Chip8AppBuilder::default()
             .map(arr)

@@ -1,7 +1,7 @@
-mod consts;
 mod chip8;
-mod inst;
+mod consts;
 mod error;
+mod inst;
 
 pub use chip8::Chip8;
 

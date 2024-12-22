@@ -35,7 +35,7 @@ pub enum Instruction {
     IFX29(u8),
     IFX33(u8),
     IFX55(u8),
-    IFX65(u8)
+    IFX65(u8),
 }
 
 impl Instruction {
@@ -82,7 +82,7 @@ impl TryFrom<u16> for Instruction {
             0 => match n4 {
                 0xE => Ok(Instruction::I00EE),
                 0x0 => Ok(Instruction::I00E0),
-                _ => Err(Chip8Error::DecodeError("Unknown instruction".into(), value))
+                _ => Err(Chip8Error::DecodeError("Unknown instruction".into(), value)),
             },
             1 => Ok(Instruction::I1NNN(nnn)),
             2 => Ok(Instruction::I2NNN(nnn)),
@@ -101,7 +101,7 @@ impl TryFrom<u16> for Instruction {
                 6 => Ok(Instruction::I8XY6(x, y)),
                 7 => Ok(Instruction::I8XY7(x, y)),
                 0xE => Ok(Instruction::I8XYE(x, y)),
-                _ => Err(Chip8Error::DecodeError("Unknown instruction".into(), value))
+                _ => Err(Chip8Error::DecodeError("Unknown instruction".into(), value)),
             },
             9 => Ok(Instruction::I9XY0(x, y)),
             0xA => Ok(Instruction::IANNN(nnn)),
@@ -109,9 +109,9 @@ impl TryFrom<u16> for Instruction {
             0xC => Ok(Instruction::ICXKK(x, kk)),
             0xD => Ok(Instruction::IDXYN(x, y, n)),
             0xE => match (n2, n3) {
-                (9, 0xE) => Ok(Instruction::IEX9E(x)), 
-                (0xA, 1) => Ok(Instruction::IEXA1(x)), 
-                _ => Err(Chip8Error::DecodeError("Unknown instruction".into(), value))
+                (9, 0xE) => Ok(Instruction::IEX9E(x)),
+                (0xA, 1) => Ok(Instruction::IEXA1(x)),
+                _ => Err(Chip8Error::DecodeError("Unknown instruction".into(), value)),
             },
             0xF => match (n3, n4) {
                 (0, 7) => Ok(Instruction::IFX07(x)),
@@ -123,9 +123,9 @@ impl TryFrom<u16> for Instruction {
                 (3, 3) => Ok(Instruction::IFX33(x)),
                 (5, 5) => Ok(Instruction::IFX55(x)),
                 (6, 5) => Ok(Instruction::IFX65(x)),
-                _ => Err(Chip8Error::DecodeError("Unknown instruction".into(), value))
+                _ => Err(Chip8Error::DecodeError("Unknown instruction".into(), value)),
             },
-            _ => Err(Chip8Error::DecodeError("Unknown instruction".into(), value))
+            _ => Err(Chip8Error::DecodeError("Unknown instruction".into(), value)),
         }
     }
 }
