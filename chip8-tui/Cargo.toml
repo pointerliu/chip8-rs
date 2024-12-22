@@ -1,0 +1,10 @@
+[package]
+name = "chip8-tui"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crossterm ={ version = "*"}
+ratatui = { version = "*"}
+derive_builder = { version = "*" }
+rand = { version = "*" }
