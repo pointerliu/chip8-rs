@@ -9,7 +9,7 @@ use crate::{consts::*, error::Chip8Error, inst::Instruction};
 
 pub struct Chip8 {
     mem: Vec<u8>,
-    regs: [u16; REG_SIZE],
+    regs: [u8; REG_SIZE],
     reg_i: u16,
     dt: u8,
     st: u8,
@@ -40,14 +40,14 @@ impl Chip8 {
         })
     }
 
-    fn write_reg(&mut self, reg_num: u8, value: u16) {
+    fn write_reg(&mut self, reg_num: u8, value: u8) {
         if reg_num == 0xF {
             warn!("writing to vF flags register...")
         }
         self.regs[reg_num as usize] = value;
     }
 
-    fn read_reg(&mut self, reg_num: u8) -> u16 {
+    fn read_reg(&mut self, reg_num: u8) -> u8 {
         self.regs[reg_num as usize]
     }
 
@@ -95,12 +95,12 @@ impl Chip8 {
                 npc = addr;
             }
             Instruction::I3XKK(x, kk) => {
-                if self.read_reg(x) == kk as u16 {
+                if self.read_reg(x) == kk as u8 {
                     npc += 2;
                 }
             }
             Instruction::I4XKK(x, kk) => {
-                if self.read_reg(x) != kk as u16 {
+                if self.read_reg(x) != kk as u8 {
                     npc += 2;
                 }
             }
@@ -109,9 +109,9 @@ impl Chip8 {
                     npc += 2;
                 }
             }
-            Instruction::I6XKK(x, kk) => self.write_reg(x, kk as u16),
+            Instruction::I6XKK(x, kk) => self.write_reg(x, kk as u8),
             Instruction::I7XKK(x, kk) => {
-                let tmp = self.read_reg(x) + kk as u16;
+                let tmp = self.read_reg(x) + kk as u8;
                 self.write_reg(x, tmp);
             }
             Instruction::I8XY0(x, y) => {
@@ -136,35 +136,35 @@ impl Chip8 {
             Instruction::I8XY4(x, y) => {
                 let vx = self.read_reg(x);
                 let vy = self.read_reg(y);
-                let res: u16 = vx + vy;
-                let c = ((res >> 8) != 0) as u16;
+                let res: u8 = vx + vy;
+                let c = ((res >> 8) != 0) as u8;
                 self.write_reg(x, res);
                 self.write_reg(0xF, c);
             }
             Instruction::I8XY5(x, y) => {
                 let vx = self.read_reg(x);
                 let vy = self.read_reg(y);
-                let res: u16 = vx - vy;
-                let c = (vx > vy) as u16;
-                self.write_reg(x, res as u16);
+                let res: u8 = vx - vy;
+                let c = (vx > vy) as u8;
+                self.write_reg(x, res as u8);
                 self.write_reg(0xF, c);
             }
             Instruction::I8XY6(x, y) => {
                 let vx = self.read_reg(x);
-                self.write_reg(0xF, ((vx & 1) == 1) as u16);
+                self.write_reg(0xF, ((vx & 1) == 1) as u8);
                 self.write_reg(x, vx >> 1);
             }
             Instruction::I8XY7(x, y) => {
                 let vx = self.read_reg(x);
                 let vy = self.read_reg(y);
-                let res: u16 = vy - vx;
-                let c = (vy > vx) as u16;
-                self.write_reg(x, res as u16);
+                let res: u8 = vy - vx;
+                let c = (vy > vx) as u8;
+                self.write_reg(x, res as u8);
                 self.write_reg(0xF, c);
             }
             Instruction::I8XYE(x, y) => {
                 let vx = self.read_reg(x);
-                self.write_reg(0xF, ((vx & (1 << 7)) == 1) as u16);
+                self.write_reg(0xF, ((vx & (1 << 7)) == 1) as u8);
                 self.write_reg(x, vx << 1);
             }
             Instruction::I9XY0(x, y) => {
@@ -178,12 +178,12 @@ impl Chip8 {
                 self.reg_i = nnn;
             }
             Instruction::IBNNN(nnn) => {
-                npc = nnn + self.read_reg(0)
+                npc = nnn + self.read_reg(0) as u16
             }
             Instruction::ICXKK(x, kk) => {
                 let mut rng = rand::thread_rng();
                 let rd: u8 = rng.gen();
-                self.write_reg(x, (rd & kk) as u16); 
+                self.write_reg(x, (rd & kk) as u8); 
             }
             Instruction::IDXYN(x, y, nibble) => {
                todo!() 
@@ -201,12 +201,12 @@ impl Chip8 {
                 }
             }
             Instruction::IFX07(x) => {
-                self.write_reg(x, self.dt as u16);
+                self.write_reg(x, self.dt as u8);
             }
             Instruction::IFX0A(x) => {
                 for k in 0..16 {
                     if self.keys[k] {
-                        self.write_reg(x, k as u16);
+                        self.write_reg(x, k as u8);
                     }
                 }
             }
