@@ -1,15 +1,12 @@
-use std::error::{self, Error};
+use std::error::Error;
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use derive_builder::Builder;
 use ratatui::{
-    buffer::Buffer,
     layout::Rect,
     style::{Style, Stylize},
-    symbols::border,
-    text::{Line, Text},
-    widgets::{Block, Paragraph, Widget},
-    DefaultTerminal, Frame,
+    widgets::Block,
+    DefaultTerminal,
 };
 
 const SCREEN_WIDTH: usize = 64;
