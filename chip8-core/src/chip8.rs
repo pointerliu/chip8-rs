@@ -1,20 +1,22 @@
 use std::{
-    fs::{self, File},
-    io::{self, Read},
+    fs::File, io::{self, Read}
 };
 
 use log::{info, warn};
+use rand::Rng;
 
 use crate::{consts::*, error::Chip8Error, inst::Instruction};
 
 pub struct Chip8 {
     mem: Vec<u8>,
     regs: [u16; REG_SIZE],
+    reg_i: u16,
     dt: u8,
     st: u8,
     pc: u16,
     sp: u8,
     stack: [u16; 16],
+    keys: [bool; 16],
 
     cls_scn: bool,
 }
@@ -33,6 +35,8 @@ impl Chip8 {
             sp: 0,
             stack: [0; 16],
             cls_scn: false,
+            reg_i: 0,
+            keys: [false; 16]
         })
     }
 
@@ -124,28 +128,109 @@ impl Chip8 {
                 let vy = self.read_reg(y);
                 self.write_reg(x, vx & vy);
             }
-            Instruction::I8XY3(_, _) => todo!(),
-            Instruction::I8XY4(_, _) => todo!(),
-            Instruction::I8XY5(_, _) => todo!(),
-            Instruction::I8XY6(_, _) => todo!(),
-            Instruction::I8XY7(_, _) => todo!(),
-            Instruction::I8XYE(_, _) => todo!(),
-            Instruction::I9XY0(_, _) => todo!(),
-            Instruction::IANNN(_) => todo!(),
-            Instruction::IBNNN(_) => todo!(),
-            Instruction::ICXKK(_, _) => todo!(),
-            Instruction::IDXYN(_, _, _) => todo!(),
-            Instruction::IEX9E(_) => todo!(),
-            Instruction::IEXA1(_) => todo!(),
-            Instruction::IFX07(_) => todo!(),
-            Instruction::IFX0A(_) => todo!(),
-            Instruction::IFX15(_) => todo!(),
-            Instruction::IFX18(_) => todo!(),
-            Instruction::IFX1E(_) => todo!(),
-            Instruction::IFX29(_) => todo!(),
-            Instruction::IFX33(_) => todo!(),
-            Instruction::IFX55(_) => todo!(),
-            Instruction::IFX65(_) => todo!(),
+            Instruction::I8XY3(x, y) => {
+                let vx = self.read_reg(x);
+                let vy = self.read_reg(y);
+                self.write_reg(x, vx ^ vy);
+            }
+            Instruction::I8XY4(x, y) => {
+                let vx = self.read_reg(x);
+                let vy = self.read_reg(y);
+                let res: u16 = vx + vy;
+                let c = ((res >> 8) != 0) as u16;
+                self.write_reg(x, res);
+                self.write_reg(0xF, c);
+            }
+            Instruction::I8XY5(x, y) => {
+                let vx = self.read_reg(x);
+                let vy = self.read_reg(y);
+                let res: u16 = vx - vy;
+                let c = (vx > vy) as u16;
+                self.write_reg(x, res as u16);
+                self.write_reg(0xF, c);
+            }
+            Instruction::I8XY6(x, y) => {
+                let vx = self.read_reg(x);
+                self.write_reg(0xF, ((vx & 1) == 1) as u16);
+                self.write_reg(x, vx >> 1);
+            }
+            Instruction::I8XY7(x, y) => {
+                let vx = self.read_reg(x);
+                let vy = self.read_reg(y);
+                let res: u16 = vy - vx;
+                let c = (vy > vx) as u16;
+                self.write_reg(x, res as u16);
+                self.write_reg(0xF, c);
+            }
+            Instruction::I8XYE(x, y) => {
+                let vx = self.read_reg(x);
+                self.write_reg(0xF, ((vx & (1 << 7)) == 1) as u16);
+                self.write_reg(x, vx << 1);
+            }
+            Instruction::I9XY0(x, y) => {
+                let vx = self.read_reg(x);
+                let vy = self.read_reg(y);
+                if vx != vy {
+                    npc += 2
+                }
+            }
+            Instruction::IANNN(nnn) => {
+                self.reg_i = nnn;
+            }
+            Instruction::IBNNN(nnn) => {
+                npc = nnn + self.read_reg(0)
+            }
+            Instruction::ICXKK(x, kk) => {
+                let mut rng = rand::thread_rng();
+                let rd: u8 = rng.gen();
+                self.write_reg(x, (rd & kk) as u16); 
+            }
+            Instruction::IDXYN(x, y, nibble) => {
+               todo!() 
+            }
+            Instruction::IEX9E(x) => {
+                let vx = self.read_reg(x);
+                if self.keys[vx as usize] {
+                    npc += 2
+                }
+            }
+            Instruction::IEXA1(x) => {
+                let vx = self.read_reg(x);
+                if !self.keys[vx as usize] {
+                    npc += 2
+                }
+            }
+            Instruction::IFX07(x) => {
+                self.write_reg(x, self.dt as u16);
+            }
+            Instruction::IFX0A(x) => {
+                for k in 0..16 {
+                    if self.keys[k] {
+                        self.write_reg(x, k as u16);
+                    }
+                }
+            }
+            Instruction::IFX15(x) => {
+                self.dt = self.read_reg(x) as u8
+            }
+            Instruction::IFX18(x) => {
+                self.st = self.read_reg(x) as u8
+            }
+            Instruction::IFX1E(x) => {
+                self.reg_i += self.read_reg(x) as u16
+            }
+            Instruction::IFX29(x) => {
+                todo!()
+            }
+            Instruction::IFX33(x) => {
+                todo!()
+            }
+            Instruction::IFX55(x) => {
+                todo!()
+            }
+            Instruction::IFX65(x) => {
+                todo!()
+            }
         }
     }
 }
